@@ -1,0 +1,33 @@
+import matplotlib.pyplot as plt
+import pandas as pd
+from timeit import default_timer as timer
+
+def logarithms(n):
+    i = 1
+    while i <= n:
+        i = i * 2  # Multiplicamos i por 2 en cada iteración
+
+# Lista de valores de n
+valores_n = [10, 100, 1000, 10000, 100000, 1000000]
+tiempos = []
+
+# Medimos el tiempo de ejecución para cada n
+for n in valores_n:
+    start = timer()
+    logarithms(n)
+    end = timer()
+    tiempos.append(end - start)  # Guardamos el tiempo
+
+# Crear un DataFrame con pandas (opcional)
+df = pd.DataFrame({'n': valores_n, 'Tiempo': tiempos})
+print(df)  # Muestra los datos en consola
+
+# Graficar los resultados
+plt.plot(valores_n, tiempos, marker='o', linestyle='-', color='b', label='Tiempo de ejecución')
+plt.xscale('log')  # Escala logarítmica en el eje X
+plt.xlabel('Tamaño de n')
+plt.ylabel('Tiempo (segundos)')
+plt.title('Tiempo de ejecución de función logarítmica')
+plt.legend()
+plt.grid(True)
+plt.show()
