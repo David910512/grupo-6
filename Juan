@@ -1,0 +1,28 @@
+import matplotlib.pyplot as plt
+from timeit import default_timer as timer  
+
+def logarithms(n):
+    i = 1  
+    while i <= n:
+        i = i * 2
+
+n_values = [1, 10, 100, 1000, 10000, 100000, 1000000]
+times = []  
+
+for n in n_values:
+    start = timer()
+    logarithms(n)
+    end = timer()
+    proc_time = end - start
+    times.append(proc_time)  
+    print(f"n = {n}, Processing time -> {proc_time}")
+
+plt.figure(figsize=(8, 5))
+plt.plot(n_values, times, marker='o', linestyle='-', color='b', label='Tiempo de ejecución')
+
+plt.xlabel("input size (n)")
+plt.ylabel("Execution time (seconds)")
+plt.xscale("log")  #  eje X
+plt.grid(True)
+plt.legend()
+plt.show()
