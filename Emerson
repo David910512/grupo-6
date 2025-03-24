@@ -1,21 +1,25 @@
-import matplotlib.pyplot as plt
 import time
-import math
+import matplotlib.pyplot as plt
 
-values_n = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2080, 2100, 4096]
-execution_times = []
+def towersOfHanoi(n, from_tower=1, to_tower=3, aux_tower=2):
+    if n == 1:
+        return
+    towersOfHanoi(n - 1, from_tower, aux_tower, to_tower)
+    towersOfHanoi(n - 1, aux_tower, to_tower, from_tower)
 
-for n in values_n:
-    start = time.perf_counter()
-    math.factorial(n)  # Calcula el factorial de manera eficiente
-    end = time.perf_counter()
-    execution_times.append(end - start)
+def measure_time(n):
+    start_time = time.time()
+    towersOfHanoi(n)
+    return time.time() - start_time
 
-plt.figure(figsize=(8, 5))
-plt.plot(values_n, execution_times, marker='o', linestyle='-', color='b', label="Execution Time")
-plt.xlabel("Value of n")
-plt.ylabel("Time (seconds)")
-plt.title("Execution Time of Factorial Calculation (Using math.factorial)")
-plt.legend()
+# Valores de n
+disks = list(range(1, 15))
+times = [measure_time(n) for n in disks]
+
+# Graficar resultados
+plt.plot(disks, times, marker='o', linestyle='-', color='b')
+plt.xlabel('Número de Discos')
+plt.ylabel('Tiempo de Ejecución (segundos)')
+plt.title('Tiempo de Ejecución para la Torre de Hanoi')
 plt.grid()
 plt.show()
