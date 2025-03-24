@@ -1,25 +1,21 @@
 import matplotlib.pyplot as plt
-from timeit import default_timer as timer
+import time
+import math
 
-n_values = [10, 100, 1000, 10000, 100000]
+values_n = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2080, 2100, 4096]
 execution_times = []
 
-for n in n_values:
-    start = timer()
-    for i in range(0, n):
-        print(f'I={i}')
-    end = timer()
-    
-    proc_time = end - start
-    execution_times.append(proc_time)
-    print(f'n={n}, Processing time -> {proc_time}')
+for n in values_n:
+    start = time.perf_counter()
+    math.factorial(n)  # Calcula el factorial de manera eficiente
+    end = time.perf_counter()
+    execution_times.append(end - start)
 
-plt.plot(n_values, execution_times, marker='o', linestyle='-', color='b', label='Execution Time')
-plt.xscale('log')
-plt.xlabel('Size of n')
-plt.ylabel('Time (seconds)')
-plt.title('Execution Time of a For Loop in Python')
+plt.figure(figsize=(8, 5))
+plt.plot(values_n, execution_times, marker='o', linestyle='-', color='b', label="Execution Time")
+plt.xlabel("Value of n")
+plt.ylabel("Time (seconds)")
+plt.title("Execution Time of Factorial Calculation (Using math.factorial)")
 plt.legend()
-plt.grid(True)
+plt.grid()
 plt.show()
-
