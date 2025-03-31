@@ -1,21 +1,49 @@
-import matplotlib.pyplot as plt
-import time
-import math
+class Node:
+    def __init__(self, data):
+        self.data = data
+        self.next = None
+    
+    def get_data(self):
+        return self.data
+    
+    def get_next(self):
+        return self.next
 
-values_n = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 2080, 2100, 4096]
-execution_times = []
+class LinkedList:
+    def __init__(self):
+        self.head = None
 
-for n in values_n:
-    start = time.perf_counter()
-    math.factorial(n)  # Calcula el factorial de manera eficiente
-    end = time.perf_counter()
-    execution_times.append(end - start)
+    def add(self, data):
+        new_node = Node(data)
+        if self.head is None:
+            self.head = new_node
+        else:
+            current = self.head
+            while current.get_next() is not None:
+                current = current.get_next()
+            current.next = new_node
 
-plt.figure(figsize=(8, 5))
-plt.plot(values_n, execution_times, marker='o', linestyle='-', color='b', label="Execution Time")
-plt.xlabel("Value of n")
-plt.ylabel("Time (seconds)")
-plt.title("Execution Time of Factorial Calculation (Using math.factorial)")
-plt.legend()
-plt.grid()
-plt.show()
+    def display(self):
+        """
+        Displays all elements in the linked list with their data and links.
+
+        Returns:
+            str: A string representation of the linked list.
+        """
+        if self.head is None:
+            return "Empty list"
+
+        current = self.head
+        result = ""
+
+        while current is not None:
+            result += f"[{current.get_data()}] -> "
+            current = current.get_next()
+
+        return result.rstrip(" -> ") + " -> None"
+linked_list = LinkedList()
+linked_list.add(1)
+linked_list.add(2)
+linked_list.add(3)
+
+print(linked_list.display())
