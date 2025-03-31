@@ -1,25 +1,36 @@
-import time
-import matplotlib.pyplot as plt
+class Node:
+    def _init_(self, data):
+        self.data = data
+        self.next = None
 
-def towersOfHanoi(n, from_tower=1, to_tower=3, aux_tower=2):
-    if n == 1:
-        return
-    towersOfHanoi(n - 1, from_tower, aux_tower, to_tower)
-    towersOfHanoi(n - 1, aux_tower, to_tower, from_tower)
+class LinkedList:
+    def _init_(self):
+        self.head = None
 
-def measure_time(n):
-    start_time = time.time()
-    towersOfHanoi(n)
-    return time.time() - start_time
+    def append(self, data):
+        new_node = Node(data)
+        if not self.head:
+            self.head = new_node
+            return
+        last = self.head
+        while last.next:
+            last = last.next
+        last.next = new_node
 
-# Valores de n
-disks = list(range(1, 15))
-times = [measure_time(n) for n in disks]
+    def count_nodes(self):
+        count = 0
+        current = self.head
+        while current:
+            count += 1
+            current = current.next
+        return count
 
-# Graficar resultados
-plt.plot(disks, times, marker='o', linestyle='-', color='b')
-plt.xlabel('Número de Discos')
-plt.ylabel('Tiempo de Ejecución (segundos)')
-plt.title('Tiempo de Ejecución para la Torre de Hanoi')
-plt.grid()
-plt.show()
+lista = LinkedList()
+lista.append(10)
+lista.append(20)
+lista.append(30)
+lista.append(35)
+lista.append(40)
+lista.append(45)
+
+print("Número de nodos:", lista.count_nodes())
