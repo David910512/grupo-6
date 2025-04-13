@@ -1,0 +1,265 @@
+EJERCICIO 1
+class Pila:
+    def __init__(self):
+        self.items = []
+
+    def esta_vacia(self):
+        return len(self.items) == 0
+
+    def apilar(self, item):
+        self.items.append(item)
+
+    def desapilar(self):
+        if self.esta_vacia():
+            raise IndexError("Error: no se puede desapilar de una pila vacía.")
+        return self.items.pop()
+
+    def cima(self):
+        if self.esta_vacia():
+            raise IndexError("Error: la pila está vacía.")
+        return self.items[-1]
+
+    def tamaño(self):
+        return len(self.items)
+
+
+def invertir_cadena(cadena):
+    pila = Pila()
+
+    # Paso 1: apilar cada carácter de la cadena
+    for caracter in cadena:
+        pila.apilar(caracter)
+
+    # Paso 2: desapilar para formar la cadena invertida
+    invertida = ""
+    while not pila.esta_vacia():
+        invertida += pila.desapilar()
+
+    return invertida
+
+
+def pruebas_invertir_cadena():
+    print("Pruebas de inversión de cadena:")
+    assert invertir_cadena("hola") == "aloh"
+    assert invertir_cadena("12345") == "54321"
+    assert invertir_cadena("") == ""
+    assert invertir_cadena("a") == "a"
+    assert invertir_cadena("OpenAI") == "IAnepO"
+    print("✅ Todas las pruebas pasaron correctamente.")
+
+
+if __name__ == "__main__":
+    pruebas_invertir_cadena()
+    # Ejemplo visual
+    texto = "reconocer"
+    print("Cadena original:", texto)
+    print("Cadena invertida:", invertir_cadena(texto))
+
+EJERCICIO 2:
+
+def es_operador(c):
+    return c in "+-*/"
+
+def precedencia(op):
+    if op in ('+', '-'):
+        return 1
+    elif op in ('*', '/'):
+        return 2
+    return 0
+
+def infijo_a_postfijo(expresion):
+    salida = []
+    pila = []
+    tokens = expresion.replace("(", " ( ").replace(")", " ) ").split()
+
+    for token in tokens:
+        if token.isdigit():
+            salida.append(token)
+        elif token == '(':
+            pila.append(token)
+        elif token == ')':
+            while pila and pila[-1] != '(':
+                salida.append(pila.pop())
+            pila.pop()  # quitar '('
+        elif es_operador(token):
+            while pila and pila[-1] != '(' and precedencia(pila[-1]) >= precedencia(token):
+                salida.append(pila.pop())
+            pila.append(token)
+
+    while pila:
+        salida.append(pila.pop())
+
+    return salida
+
+def evaluar_postfija(postfija):
+    pila = []
+
+    for token in postfija:
+        if token.isdigit():
+            pila.append(int(token))
+        else:
+            b = pila.pop()
+            a = pila.pop()
+            if token == '+':
+                pila.append(a + b)
+            elif token == '-':
+                pila.append(a - b)
+            elif token == '*':
+                pila.append(a * b)
+            elif token == '/':
+                pila.append(int(a / b))  # División entera
+
+    return pila[0]
+
+def evaluar_expresion_infija(expresion):
+    postfija = infijo_a_postfijo(expresion)
+    return evaluar_postfija(postfija)
+
+def pruebas_evaluar_infija():
+    print("Pruebas de expresiones infijas:")
+    assert evaluar_expresion_infija("3 + 4") == 7
+    assert evaluar_expresion_infija("3 + 4 * 2") == 11
+    assert evaluar_expresion_infija("( 3 + 4 ) * 2") == 14
+    assert evaluar_expresion_infija("10 + ( 2 * 6 )") == 22
+    assert evaluar_expresion_infija("100 * ( 2 + 12 ) / 14") == 100
+    print("✅ Todas las pruebas pasaron correctamente.")
+
+if __name__ == "__main__":
+    pruebas_evaluar_infija()
+    expresion = "( 3 + 4 ) * 2"
+    print("Expresión:", expresion)
+    print("Resultado:", evaluar_expresion_infija(expresion))
+
+
+EJERCICIO 3:
+
+
+class PilaConMinimo:
+    def __init__(self):
+        self.stack = []  # Pila principal para almacenar los elementos
+        self.min_stack = []  # Pila para almacenar los valores mínimos
+
+    def push(self, x):
+        self.stack.append(x)
+        # Si la pila de mínimos está vacía o el nuevo elemento es menor o igual que el mínimo actual
+        if not self.min_stack or x <= self.min_stack[-1]:
+            self.min_stack.append(x)
+
+    def pop(self):
+        if not self.stack:
+            raise IndexError("Pop from empty stack")
+        top = self.stack.pop()
+        # Si el elemento que se va a sacar es el mínimo, también lo eliminamos de la pila de mínimos
+        if top == self.min_stack[-1]:
+            self.min_stack.pop()
+
+    def top(self):
+        if not self.stack:
+            raise IndexError("Top from empty stack")
+        return self.stack[-1]
+
+    def getMin(self):
+        if not self.min_stack:
+            raise IndexError("GetMin from empty stack")
+        return self.min_stack[-1]
+
+# Pruebas del funcionamiento de la pila
+def pruebas_stack_con_minimo():
+    pila = PilaConMinimo()
+    
+    pila.push(5)
+    assert pila.getMin() == 5  # El mínimo es 5
+    pila.push(3)
+    assert pila.getMin() == 3  # El mínimo es 3
+    pila.push(7)
+    assert pila.getMin() == 3  # El mínimo sigue siendo 3
+    pila.push(2)
+    assert pila.getMin() == 2  # El mínimo es 2
+    pila.pop()
+    assert pila.getMin() == 3  # El mínimo vuelve a ser 3
+    pila.pop()
+    assert pila.getMin() == 3  # El mínimo sigue siendo 3
+    pila.pop()
+    assert pila.getMin() == 5  # El mínimo ahora es 5
+
+    print("✅ Todas las pruebas pasaron correctamente.")
+
+pruebas_stack_con_minimo()
+
+
+Ejercicio 4:
+import re
+
+# Function to check if HTML tags are balanced
+def check_html_tags(html):
+    stack = []
+    tags = re.findall(r'</?[^<>]+>', html)
+
+    for tag in tags:
+        if not tag.startswith('</'):
+            # It's an opening tag
+            stack.append(tag)
+        else:
+            # It's a closing tag
+            if not stack:
+                return False  # Closing tag without a corresponding opening tag
+            opening = stack.pop()
+            if opening[1:] != tag[2:]:
+                return False  # Tags do not match
+
+    return len(stack) == 0  # Stack must be empty if all tags are balanced
+
+# Test cases
+print(check_html_tags("<html><body><h1>Hello</h1></body></html>"))  # True
+print(check_html_tags("<html><body><h1>Hello</body></h1></html>"))  # False
+print(check_html_tags("<div><p>Text</p></div>"))                    # True
+print(check_html_tags("<div><p>Text</div></p>"))                    # False
+
+
+EJERCICIO 5:
+ class TextEditor:
+    def init(self):
+        self.text_stack = []  
+        self.undo_stack = []  
+    def type(self, text):
+     
+        self.undo_stack.append(self.get_text())
+      
+        for char in text:
+            self.text_stack.append(char)
+
+    def delete(self, count):
+    
+        self.undo_stack.append(self.get_text())
+        for _ in range(min(count, len(self.text_stack))):
+            self.text_stack.pop()
+
+    def undo(self):
+        if self.undo_stack:
+            prev_text = self.undo_stack.pop()
+            self.text_stack = list(prev_text)
+
+    def get_text(self):
+        return ''.join(self.text_stack)
+
+editor = TextEditor()
+
+editor.type("Hello")
+print(editor.get_text())
+
+editor.type(" World")
+print(editor.get_text())  
+
+editor.delete(6)
+print(editor.get_text()) 
+
+editor.undo()
+print(editor.get_text()) 
+
+editor.undo()
+print(editor.get_text())
+
+editor.undo()
+print(editor.get_text())
+
+
