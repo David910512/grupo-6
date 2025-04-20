@@ -1,1 +1,323 @@
+EJERCICIO 1: 
+class ColaConDosPilas:
+    def __init__(self):
+        self.pila_entrada = []  # Pila para encolar
+        self.pila_salida = []   # Pila para desencolar
+
+    def encolar(self, valor):
+        self.pila_entrada.append(valor)
+
+    def _transferir(self):
+        while self.pila_entrada:
+            self.pila_salida.append(self.pila_entrada.pop())
+
+    def desencolar(self):
+        if self.estaVacia():
+            raise IndexError("La cola está vacía")
+        if not self.pila_salida:
+            self._transferir()
+        return self.pila_salida.pop()
+
+    def primero(self):
+        if self.estaVacia():
+            raise IndexError("La cola está vacía")
+        if not self.pila_salida:
+            self._transferir()
+        return self.pila_salida[-1]
+
+    def estaVacia(self):
+        return not self.pila_entrada and not self.pila_salida
+
+    def tamaño(self):
+        return len(self.pila_entrada) + len(self.pila_salida)
+
+
+# 🔍 Ejemplo de uso
+cola = ColaConDosPilas()
+cola.encolar(10)
+cola.encolar(20)
+cola.encolar(30)
+
+print("Primero en la cola:", cola.primero())     # Salida: 10
+print("Elemento desencolado:", cola.desencolar())# Salida: 10
+print("Tamaño actual:", cola.tamaño())           # Salida: 2
+print("¿Está vacía?", cola.estaVacia())          # Salida: False
+
+Este código implementa una cola (FIFO) utilizando dos pilas (LIFO). Cuando se encola un elemento (encolar), se agrega a la primera pila (pila_entrada). 
+Cuando se necesita desencolar (desencolar) o ver el primer elemento (primero), si la segunda pila (pila_salida) está vacía, se transfieren todos los elementos
+desde la primera pila a la segunda, invirtiendo su orden para mantener el comportamiento de una cola. Así, el elemento que entró primero será el primero en 
+salir. También se incluyen métodos para saber si la cola está vacía (estaVacia) y cuántos elementos contiene (tamaño). En resumen, el código logra simular
+una cola real usando únicamente operaciones de pila.
+
+
+
+EJERCICIO 2:
+
+from collections import deque
+
+class Nodo:
+    def __init__(self, valor):
+        self.valor = valor
+        self.izquierdo = None
+        self.derecho = None
+
+def recorrido_por_niveles(raiz):
+    if not raiz:
+        return []
+
+    resultado = []
+    cola = deque()
+    cola.append(raiz)
+
+    while cola:
+        nodo_actual = cola.popleft()
+        resultado.append(nodo_actual.valor)
+
+        if nodo_actual.izquierdo:
+            cola.append(nodo_actual.izquierdo)
+        if nodo_actual.derecho:
+            cola.append(nodo_actual.derecho)
+
+    return resultado
+
+raiz = Nodo(1)
+raiz.izquierdo = Nodo(2)
+raiz.derecho = Nodo(3)
+raiz.izquierdo.izquierdo = Nodo(4)
+raiz.izquierdo.derecho = Nodo(5)
+raiz.derecho.derecho = Nodo(6)
+
+print("Recorrido por niveles:", recorrido_por_niveles(raiz))
+
+
+-Este código realiza un recorrido por niveles (también llamado recorrido en anchura o level-order traversal) de un árbol binario, utilizando una 
+cola para procesar los nodos en orden. Comienza encolando el nodo raíz y, mientras haya nodos en la cola, los va desencolando uno por uno, guardando 
+su valor en una lista de resultados. Luego, encola los hijos izquierdo y derecho de cada nodo (si existen) para continuar el recorrido en el siguiente 
+nivel. Al finalizar, devuelve una lista con los valores de todos los nodos en el orden en que fueron visitados, de arriba hacia abajo y de izquierda a 
+derecha por nivel.
+4o
+
+
+EJERCICIO 3: 
+
+import random
+from collections import deque
+
+def hot_potato(players, max_passes):
+    queue = deque(players)
+
+    while len(queue) > 1:
+        passes = random.randint(1, max_passes)
+
+        for _ in range(passes):
+            player = queue.popleft()
+            queue.append(player)
+            print(f"{player} passes the hot potato")
+
+        eliminated = queue.popleft()
+        print(f"{eliminated} is eliminated!")
+
+    winner = queue[0]
+    print(f" The winner is: {winner}")
+    print("-" * 40 + "\n")
+    return winner
+
+hot_potato(["Alice", "Bob", "Charlie", "Diana"], 3)
+hot_potato(["John", "Paul", "George", "Ringo"], 1)
+hot_potato(["Ana", "Luis", "Sofía"], 5)
+
+El prompt solicita implementar un algoritmo de simulación que utilice una cola para modelar el paso de un objeto (la papa caliente) entre varios 
+jugadores, eliminando a quien la tenga tras un número aleatorio de pases. El objetivo final es obtener al único jugador que queda como ganador.
+
+Análisis del código:
+Estructura de datos: Se utiliza deque de la biblioteca collections para representar la cola circular de jugadores.
+
+
+Proceso de pase: Por cada ronda, se simula un número aleatorio de pases (entre 1 y max_passes), sacando jugadores del frente y colocándolos al final.
+
+
+Eliminación: Luego de los pases, el jugador al frente de la cola es eliminado.
+
+
+Fin del juego: Cuando queda un solo jugador en la cola, se declara como ganador.
+
+
+ Explicación del algoritmo:
+El juego comienza con una lista de jugadores en una estructura tipo cola.
+
+
+Se simulan rondas donde cada jugador "pasa" la papa caliente a otro.
+
+
+Al final de cada ronda, quien tiene la papa es eliminado.
+
+
+Esto se repite hasta que solo queda uno, quien es el ganador.
+
+EJERCICIO 4:
+
+from collections import deque
+
+def sliding_window_max(nums, k):
+    result = []
+    q = deque() 
+
+    for i in range(len(nums)):
+        if q and q[0] < i - k + 1:
+            q.popleft()
+
+        while q and nums[q[-1]] < nums[i]:
+            q.pop()
+
+        q.append(i)
+
+        if i >= k - 1:
+            result.append(nums[q[0]])
+
+    return result
+
+print(sliding_window_max([1, 3, -1, -3, 5, 3, 6, 7], 3))
+print(sliding_window_max([9, 2, 4, 7, 3, 8], 2))
+print(sliding_window_max([5, 5, 5, 5], 2))
+
+Análisis del prompt:
+-Este ejercicio busca una implementación eficiente (mejor que O(n*k)) para encontrar el valor máximo en cada ventana de tamaño k en un array.
+Utilizar una deque permite insertar y eliminar extremos en tiempo constante, lo que lo hace ideal para este tipo de problemas
+Análisis del código:
+deque almacena índices, no valores directamente, para poder saber si un valor está fuera de la ventana actual.
+Se mantienen solo los índices de candidatos máximos en orden decreciente.
+
+Si un nuevo valor es mayor que los anteriores, se eliminan (pues ya no pueden ser máximos).
+El máximo de cada ventana se guarda en result.
+
+
+Cómo funciona el algoritmo:
+Recorre el array nums una vez → O(n)
+
+
+Por cada índice:
+
+
+Elimina índices fuera del rango de la ventana actual.
+
+
+Elimina valores más pequeños que el actual.
+
+
+Añade el índice actual a la cola.
+
+
+Añade el valor máximo (frente de la cola) a result si ya estamos en la ventana.
+
+EJERCICIO 5:
+
+
+import random
+from collections import deque
+
+# Represents a customer with an ID and a number of items
+class Customer:
+    def __init__(self, customer_id, items_count):
+        self.customer_id = customer_id
+        self.items_count = items_count
+
+# Represents a checkout lane in the supermarket
+class CheckoutLane:
+    def __init__(self, lane_id, processing_rate):
+        self.lane_id = lane_id
+        self.processing_rate = processing_rate  # Items processed per second
+        self.queue = deque()  # Queue of customers waiting
+        self.total_processed = 0  # Count of processed customers
+
+    # Add a new customer to the lane queue
+    def add_customer(self, customer):
+        self.queue.append(customer)
+
+    # Process one customer from the front of the queue
+    def process_customer(self):
+        if self.queue:
+            customer = self.queue.popleft()
+            # Simulate processing time (not waiting in this version)
+            time_to_process = customer.items_count / self.processing_rate
+            self.total_processed += 1
+            return customer
+        return None
+
+    # Estimate total waiting time for the current queue
+    def get_waiting_time(self):
+        total_wait_time = 0
+        for i, customer in enumerate(self.queue):
+            total_wait_time += (i + 1) * customer.items_count / self.processing_rate
+        return total_wait_time
+
+# Manages multiple checkout lanes and customers
+class Supermarket:
+    def __init__(self, num_lanes):
+        # Create lanes with random processing speeds
+        self.lanes = [CheckoutLane(i, random.uniform(1, 5)) for i in range(num_lanes)]
+        self.customers_served = 0
+        self.total_wait_time = 0
+
+    # Assign a new customer to the shortest queue
+    def assign_customer(self, customer):
+        shortest_queue = min(self.lanes, key=lambda lane: len(lane.queue))
+        shortest_queue.add_customer(customer)
+
+    # Process all customers in all lanes
+    def process_all_customers(self):
+        while any(lane.queue for lane in self.lanes):  # As long as any lane has customers
+            for lane in self.lanes:
+                if lane.queue:
+                    customer = lane.process_customer()
+                    if customer:
+                        self.customers_served += 1
+                        self.total_wait_time += lane.get_waiting_time()
+
+    # Calculate simulation statistics
+    def calculate_statistics(self):
+        avg_wait_time = self.total_wait_time / self.customers_served if self.customers_served else 0
+        return {
+            "Total Customers Served": self.customers_served,
+            "Average Wait Time (seconds)": avg_wait_time
+        }
+
+# Test cases
+def simulate_supermarket():
+    supermarket = Supermarket(num_lanes=3)
+
+    # Generate 20 random customers with 1–20 items each
+    customers = [Customer(i, random.randint(1, 20)) for i in range(1, 21)]
+
+    # Assign each customer to a checkout lane
+    for customer in customers:
+        supermarket.assign_customer(customer)
+
+    # Start processing all customers
+    supermarket.process_all_customers()
+
+    # Display the statistics
+    stats = supermarket.calculate_statistics()
+    print(f"Total Customers Served: {stats['Total Customers Served']}")
+    print(f"Average Wait Time: {stats['Average Wait Time (seconds)']:.2f} seconds")
+
+simulate_supermarket()
+
+
+
+Complexity Analysis
+Time Complexity:
+assign_customer: O(1) to find the shortest queue (constant time if there are few lanes).
+
+
+process_all_customers: O(n), where n is the total number of customers (each customer is processed once).
+
+
+get_waiting_time: O(m) in the worst case, where m is the number of customers in a lane.
+
+
+Space Complexity:
+O(n): Customers are stored in memory.
+
+
+
 
