@@ -1,0 +1,421 @@
+Ejercicio 1:
+
+El problema solicita obtener el máximo en cada ventana deslizante de tamaño k. Se puede resolver de forma eficiente usando una cola doble (deque) que mantenga los índices 
+de los elementos candidatos a ser máximos, en orden decreciente. Esto permite resolverlo en tiempo O(n).
+
+
+def sliding_window_maximum(nums, k):
+    if not nums or k <= 0 or k > len(nums):
+        return []
+
+    result = []
+    deque = []  # Store indices, not values
+
+    for i in range(len(nums)):
+        # Remove elements outside current window
+        while deque and deque[0] < i - k + 1:
+            deque.pop(0)
+
+        # Remove smaller elements (they won't be maximum)
+        while deque and nums[deque[-1]] < nums[i]:
+            deque.pop()
+
+        # Add current element
+        deque.append(i)
+
+        # Add to result if we've processed at least k elements
+        if i >= k - 1:
+            result.append(nums[deque[0]])
+
+    return result
+nums = [1, 3, -1, -3, 5, 3, 6, 7]
+k = 3
+print(sliding_window_maximum(nums, k))
+
+Se usa una lista (deque = []) para simular un deque, donde se almacenan los índices de los elementos de la lista nums.
+
+Se eliminan del inicio de la lista (deque.pop(0)) los índices de los elementos que ya no están dentro de la ventana actual, es decir, que se salieron del rango [i - k + 1, i].
+
+Se eliminan del final de la lista (deque.pop()) los índices cuyos valores en nums son menores que el valor actual (nums[i]), ya que no podrán ser máximos en esta ni en futuras ventanas.
+
+El inicio de la lista (deque[0]) siempre representa el índice del valor máximo de la ventana actual, porque los valores más grandes se mantienen más tiempo.
+
+A partir de que se ha recorrido al menos una ventana completa (i >= k - 1), se agrega al resultado el valor correspondiente al índice máximo (nums[deque[0]]).
+
+
+Ejercicio 2:
+
+Este código rota los elementos de un arreglo hacia la derecha k posiciones usando una cola circular. Primero, se implementa una clase CircularQueue que permite insertar (enqueue) 
+y eliminar (dequeue) elementos de forma circular, simulando el comportamiento de una estructura de datos que se "reinicia" al llegar al final. En la función principal, se insertan 
+todos los elementos del arreglo en la cola y luego se rotan a la derecha k veces al eliminar los primeros n - k elementos y volverlos a insertar al final. Finalmente, se extraen los 
+elementos en su nuevo orden y se devuelve el arreglo rotado. Esta solución es eficiente y tiene complejidad O(n).
+
+class CircularQueue:
+    def __init__(self, capacity):
+        self.capacity = capacity
+        self.queue = [None] * capacity
+        self.front = -1
+        self.rear = -1
+        self.size = 0
+
+    def is_empty(self):
+        return self.size == 0
+
+    def is_full(self):
+        return self.size == self.capacity
+
+    def enqueue(self, item):
+        if self.is_full():
+            raise OverflowError("Cola llena")
+        if self.is_empty():
+            self.front = 0
+        self.rear = (self.rear + 1) % self.capacity
+        self.queue[self.rear] = item
+        self.size += 1
+
+    def dequeue(self):
+        if self.is_empty():
+            raise IndexError("Cola vacía")
+        item = self.queue[self.front]
+        self.queue[self.front] = None
+        if self.front == self.rear:
+            self.front = -1
+            self.rear = -1
+        else:
+            self.front = (self.front + 1) % self.capacity
+        self.size -= 1
+        return item
+
+    def get_elements(self):
+        result = []
+        i = self.front
+        for _ in range(self.size):
+            result.append(self.queue[i])
+            i = (i + 1) % self.capacity
+        return result
+
+def rotar_arreglo_derecha(arr, k):
+    n = len(arr)
+    k = k % n  # en caso k > n
+
+    cola = CircularQueue(n)
+
+    # Paso 1: encolar todos los elementos
+    for num in arr:
+        cola.enqueue(num)
+
+    # Paso 2: rotar hacia la derecha — desencolar y volver a encolar n - k veces
+    for _ in range(n - k):
+        temp = cola.dequeue()
+        cola.enqueue(temp)
+
+    # Paso 3: extraer el arreglo rotado
+    return cola.get_elements()
+
+# 🔍 Ejemplo de uso
+if __name__ == "__main__":
+    arreglo = [1, 2, 3, 4, 5, 6, 7]
+    k = 3
+    resultado = rotar_arreglo_derecha(arreglo, k)
+    print("Arreglo rotado:", resultado)
+
+
+
+Ejercicio 3:
+
+-Este código simula el flujo vehicular en una intersección con semáforos usando colas circulares para representar cada carril (Norte, Sur, Este y Oeste). Los vehículos 
+llegan aleatoriamente con una probabilidad determinada y se almacenan en la cola del carril correspondiente. Los semáforos alternan entre permitir el paso a los carriles
+Norte-Sur y Este-Oeste cada cierto intervalo de tiempo. Cuando el semáforo está en verde, los vehículos al frente de la cola avanzan, registrando su tiempo de espera. Al finalizar 
+la simulación, se muestran estadísticas por carril, como la longitud máxima de la cola, el tiempo promedio de espera y el total de vehículos atendidos. Esta solución es eficiente y
+refleja el comportamiento realista del tráfico, con una complejidad O(n).
+
+import random
+from collections import deque
+
+class Vehiculo:
+    def __init__(self, tiempo_llegada):
+        self.tiempo_llegada = tiempo_llegada
+
+class Carril:
+    def __init__(self, nombre, max_tamano):
+        self.nombre = nombre
+        self.cola = deque(maxlen=max_tamano)
+        self.max_longitud = 0
+        self.tiempo_espera_total = 0
+        self.vehiculos_atendidos = 0
+
+    def llega_vehiculo(self, tiempo_actual):
+        if len(self.cola) < self.cola.maxlen:
+            self.cola.append(Vehiculo(tiempo_actual))
+            self.max_longitud = max(self.max_longitud, len(self.cola))
+
+    def avanza_vehiculo(self, tiempo_actual):
+        if self.cola:
+            vehiculo = self.cola.popleft()
+            espera = tiempo_actual - vehiculo.tiempo_llegada
+            self.tiempo_espera_total += espera
+            self.vehiculos_atendidos += 1
+
+    def tiempo_espera_promedio(self):
+        if self.vehiculos_atendidos == 0:
+            return 0
+        return self.tiempo_espera_total / self.vehiculos_atendidos
+
+carriles = {
+    "norte": Carril("Norte", 10),
+    "sur": Carril("Sur", 10),
+    "este": Carril("Este", 10),
+    "oeste": Carril("Oeste", 10)
+}
+
+def simular_trafico(tiempo_total, duracion_luz):
+    tiempo = 0
+    semaforo_ns_verde = True  
+
+    while tiempo < tiempo_total:
+        for direccion in carriles:
+            if random.random() < 0.3:  
+                carriles[direccion].llega_vehiculo(tiempo)
+
+        if semaforo_ns_verde:
+            for d in ["norte", "sur"]:
+                carriles[d].avanza_vehiculo(tiempo)
+        else:
+            for d in ["este", "oeste"]:
+                carriles[d].avanza_vehiculo(tiempo)
+
+        if tiempo % duracion_luz == 0:
+            semaforo_ns_verde = not semaforo_ns_verde
+
+        tiempo += 1
+
+    for nombre, carril in carriles.items():
+        print(f"Carril {nombre.capitalize()}:")
+        print(f"  Máxima longitud de cola: {carril.max_longitud}")
+        print(f"  Tiempo promedio de espera: {carril.tiempo_espera_promedio():.2f} unidades")
+        print(f"  Vehículos atendidos: {carril.vehiculos_atendidos}\n")
+
+simular_trafico(tiempo_total=100, duracion_luz=10)
+
+
+
+
+Ejercicio 4:
+
+
+Este código simula un sistema de planificación de tareas con el algoritmo Round Robin, donde varios procesos reciben tiempo de CPU de manera justa y en turnos usando 
+una cola circular. Cada proceso tiene un tiempo fijo (quantum) para ejecutarse; si no termina en ese tiempo, vuelve al final de la cola. El código gestiona esta rotación, 
+registrando el tiempo que cada proceso espera y cuánto tarda en completarse. Al final, muestra para cada proceso su turnaround time (tiempo total desde que entró hasta que terminó)
+y su waiting time (tiempo que estuvo esperando sin ejecutar), lo cual ayuda a entender cómo se comporta este algoritmo de reparto de CPU en sistemas operativos.
+
+class Process:
+    def __init__(self, name, burst_time):
+        self.name = name
+        self.remaining_time = burst_time
+        self.burst_time = burst_time
+        self.start_time = None
+        self.end_time = None
+        self.total_waiting_time = 0
+        self.last_executed = 0
+
+    def __str__(self):
+        return f"{self.name}(remaining: {self.remaining_time})"
+
+
+class CircularQueue:
+    def __init__(self, capacity):
+        self.queue = [None] * capacity
+        self.capacity = capacity
+        self.front = -1
+        self.rear = -1
+        self.size = 0
+
+    def is_empty(self):
+        return self.size == 0
+
+    def is_full(self):
+        return self.size == self.capacity
+
+    def enqueue(self, item):
+        if self.is_full():
+            raise OverflowError("Queue is full")
+
+        if self.is_empty():
+            self.front = 0
+
+        self.rear = (self.rear + 1) % self.capacity
+        self.queue[self.rear] = item
+        self.size += 1
+
+    def dequeue(self):
+        if self.is_empty():
+            raise IndexError("Queue is empty")
+
+        item = self.queue[self.front]
+        self.queue[self.front] = None
+
+        if self.front == self.rear:
+            self.front = -1
+            self.rear = -1
+        else:
+            self.front = (self.front + 1) % self.capacity
+
+        self.size -= 1
+        return item
+
+
+def round_robin_scheduler(processes, quantum):
+    time = 0
+    completed_processes = []
+
+    queue = CircularQueue(len(processes))
+    for p in processes:
+        queue.enqueue(p)
+
+    while not queue.is_empty():
+        process = queue.dequeue()
+
+        # Calcula el tiempo de espera desde su última ejecución
+        process.total_waiting_time += time - process.last_executed
+
+        if process.start_time is None:
+            process.start_time = time
+
+        exec_time = min(quantum, process.remaining_time)
+        time += exec_time
+        process.remaining_time -= exec_time
+        process.last_executed = time
+
+        print(f"[Tiempo {time}] Ejecutando {process.name} por {exec_time} unidades")
+
+        if process.remaining_time > 0:
+            queue.enqueue(process)
+        else:
+            process.end_time = time
+            completed_processes.append(process)
+
+    print("\n📊 Resultados finales:")
+    for p in completed_processes:
+        turnaround = p.end_time
+        waiting = p.total_waiting_time - p.burst_time + turnaround
+        print(f"{p.name} | Turnaround: {turnaround} | Waiting: {waiting}")
+
+
+# 🔧 Simulación
+procesos = [
+    Process("P1", 6),
+    Process("P2", 4),
+    Process("P3", 9),
+    Process("P4", 5)
+]
+
+quantum = 3
+round_robin_scheduler(procesos, quantum)
+
+
+
+
+
+
+
+
+Ejercicio 5:
+
+This program simulates a circular buffer for data streaming where old data is replaced by new data once the buffer reaches its capacity. It demonstrates how such a structure 
+works and includes tests to ensure it behaves correctly under different conditions.
+
+class CircularBuffer:
+    """A fixed-size circular buffer for streaming data."""
+
+    def __init__(self, capacity):
+        """Initialize the buffer with a fixed capacity."""
+        self.capacity = capacity
+        self.buffer = [None] * capacity
+        self.start = 0
+        self.count = 0
+
+    def add_data(self, value):
+        """Add a new element to the buffer."""
+        index = (self.start + self.count) % self.capacity
+        if self.count == self.capacity:
+            # Overwrite the oldest data
+            self.start = (self.start + 1) % self.capacity
+            index = (self.start + self.count - 1) % self.capacity
+        else:
+            self.count += 1
+        self.buffer[index] = value
+
+    def get_all(self):
+        """Get all current elements in the buffer in order."""
+        items = []
+        for i in range(self.count):
+            index = (self.start + i) % self.capacity
+            items.append(self.buffer[index])
+        return items
+
+    def get_average(self):
+        """Return the average of the current elements."""
+        elements = self.get_all()
+        if not elements:
+            return 0
+        return sum(elements) / len(elements)
+
+    def get_latest(self):
+        """Get the most recent item added."""
+        if self.count == 0:
+            return None
+        last_index = (self.start + self.count - 1) % self.capacity
+        return self.buffer[last_index]
+
+
+# -------------------------------
+# Test and demonstration section
+# -------------------------------
+def demonstrate_circular_buffer():
+    print("🌀 Demonstrating Circular Buffer")
+
+    buffer = CircularBuffer(5)
+    for value in [10, 20, 30, 40, 50]:
+        buffer.add_data(value)
+    
+    print("Buffer contents:", buffer.get_all())  # [10, 20, 30, 40, 50]
+    
+    buffer.add_data(60)
+    print("After adding 60:", buffer.get_all())  # [20, 30, 40, 50, 60]
+    
+    print("Latest value:", buffer.get_latest())  # 60
+    print("Average:", buffer.get_average())      # 40.0
+
+    print("\n✅ Running additional test cases...\n")
+
+    # Test Case 1: Empty buffer
+    empty_buffer = CircularBuffer(3)
+    print("Test 1 - Empty buffer:")
+    print("  Elements:", empty_buffer.get_all())       # []
+    print("  Average:", empty_buffer.get_average())    # 0
+
+    # Test Case 2: Partial fill
+    buffer2 = CircularBuffer(4)
+    buffer2.add_data(5)
+    buffer2.add_data(15)
+    print("\nTest 2 - Partial buffer:")
+    print("  Elements:", buffer2.get_all())            # [5, 15]
+    print("  Average:", buffer2.get_average())         # 10.0
+
+    # Test Case 3: Overwrite behavior
+    buffer3 = CircularBuffer(3)
+    for val in [1, 2, 3, 4]:
+        buffer3.add_data(val)
+    print("\nTest 3 - Overwriting data:")
+    print("  Elements:", buffer3.get_all())            # [2, 3, 4]
+    print("  Latest:", buffer3.get_latest())           # 4
+    print("  Average:", buffer3.get_average())         # 3.0
+
+
+# Execute the demo
+if __name__ == "__main__":
+    demonstrate_circular_buffer()
+
+
+
+
