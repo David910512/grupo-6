@@ -1,1 +1,248 @@
+Lab07: Trees.
+Capacidades
+Identificar la importancia de los algoritmos en programación.
+
+Seguridad
+Generar un ambiente seguro.
+Evitar el consumo de alimentos.
+Dejar el ambiente ordenado y limpio.
+
+Preparación
+El alumno debe revisar previamente el material cargado.
+
+Recursos
+Computadora.
+
+Instrucciones
+Cada integrante del grupo debe seleccionar un reto diferente y desarrollarlo con la siguiente estructura:
+Nombre del alumno
+Reto a desarrollar
+Prompt engineering (Si aplica)
+Prompt ingresado y/o captura
+Prompt de interacción  y/o captura
+Código
+Código desarrollado y diagrama de flujo autogenerado
+Explicación de línea por línea
+Captura de la ejecución del código
+3 Casos de prueba
+Desarrollar todo el código en inglés.
+
+
+Ejercicio 1:
+
+-El código define primero una clase Node para representar cada nodo del árbol binario, donde cada nodo tiene un valor y dos hijos (left y right). Luego, define una función 
+tree_height que recibe un nodo como entrada y calcula recursivamente la altura del árbol: si el nodo es nulo (None), significa que no hay más ramas y se devuelve -1; si no, 
+la función calcula la altura del subárbol izquierdo y derecho, toma el máximo de esos dos valores y le suma 1 para incluir el nodo actual. Finalmente, el árbol del ejemplo 
+se construye manualmente creando nodos y conectándolos, y se imprime la altura llamando a la función tree_height sobre la raíz del árbol.
+
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def tree_height(node):
+    # Caso base: Si el nodo es None, su altura es -1    
+    if node is None:
+        return -1
+    
+    # Llamada recursiva a la izquierda y a la derecha
+    left_height = tree_height(node.left)
+    right_height = tree_height(node.right)
+    
+    # Altura actual es el máximo entre izquierda y derecha + 1
+    return max(left_height, right_height) + 1
+
+# Construyendo el árbol del ejemplo
+root = Node(1)
+root.left = Node(2)
+root.right = Node(3)
+root.left.left = Node(4)
+root.left.right = Node(5)
+
+# Calculando la altura
+print("La altura del árbol es:", tree_height(root))
+
+
+Ejercicio 2:
+
+Input Prompt:
+-Write a function to count the number of leaf nodes in a binary tree.
+A leaf node is a node that has no children.
+Interaction Prompt:
+-Provide a binary tree and return the number of its leaf nodes.
+
+class Node:
+    def __init__(self, value):  
+        self.value = value
+        self.left = None
+        self.right = None
+
+def count_leaf_nodes(node):
+    if node is None:
+        return 0
+    if node.left is None and node.right is None:
+        return 1
+    return count_leaf_nodes(node.left) + count_leaf_nodes(node.right)
+
+# Example usage
+root = Node(1)
+root.left = Node(2)
+root.right = Node(3)
+root.left.left = Node(4)
+root.left.right = Node(5)
+
+print("Number of leaf nodes:", count_leaf_nodes(root))
+
+
+
+Ejercicio 3: 
+
+-The program implements a function called mirror_tree that mirrors a binary tree by swapping the left and right children of every node.
+ It also includes automatic tests (test_mirror_tree) to verify that the function works correctly across different scenarios, such as a normal tree, 
+an empty tree, a single-node tree, a tree with only left children, and a perfect binary tree.
+ To validate the results, an inorder traversal is used to easily compare the tree structure after mirroring.
+
+class TreeNode:
+    """Basic node for a binary tree."""
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def mirror_tree(node):
+    """Mirror the binary tree starting from the given node."""
+    if node is None:
+        return None
+    
+    # Swap left and right children
+    node.left, node.right = node.right, node.left
+
+    # Recursively mirror the left and right subtrees
+    mirror_tree(node.left)
+    mirror_tree(node.right)
+
+    return node
+
+def print_tree(node):
+    """Helper function to print tree in preorder (for testing purposes)."""
+    if node:
+        print(node.value, end=" ")
+        print_tree(node.left)
+        print_tree(node.right)
+
+# Create a sample tree
+root = TreeNode(1)
+root.left = TreeNode(2)
+root.right = TreeNode(3)
+root.left.left = TreeNode(4)
+root.left.right = TreeNode(5)
+
+# Print original tree
+print("Original Tree:")
+print_tree(root)  # Output: 1 2 4 5 3
+
+# Mirror the tree
+mirrored_root = mirror_tree(root)
+
+# Print mirrored tree
+print("\nMirrored Tree:")
+print_tree(mirrored_root)  # Output: 1 3 2 5 4
+
+
+Ejercicio 4:
+--El código define primero una clase TreeNode para representar los nodos de un árbol binario, cada uno con un valor y dos hijos (left y right). Luego, 
+implementa la función level_order_traversal, que recibe la raíz del árbol y realiza un recorrido por niveles usando una cola (deque): si la raíz es nula, 
+devuelve una lista vacía; si no, encola el nodo raíz y recorre el árbol extrayendo nodos de la cola, agregando su valor al resultado y encolando sus hijos 
+izquierdo y derecho si existen. Así, se visitan los nodos nivel por nivel, de izquierda a derecha. Finalmente, se crean distintos árboles de prueba y se llama 
+a la función para verificar que el recorrido sea el esperado.
+
+from collections import deque
+
+class TreeNode:
+    def __init__(self, val=0, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def level_order_traversal(root):
+    if not root:
+        return []
+    
+    result = []
+    queue = deque([root])  # Usamos deque para eficiencia en pop(0)
+    
+    while queue:
+        node = queue.popleft()
+        result.append(node.val)
+        
+        if node.left:
+            queue.append(node.left)
+        if node.right:
+            queue.append(node.right)
+    
+    return result
+
+# Tests
+def test_level_order_traversal():
+    # Test Case 1: Normal tree
+    root = TreeNode(1)
+    root.left = TreeNode(2)
+    root.right = TreeNode(3)
+    root.left.left = TreeNode(4)
+    root.left.right = TreeNode(5)
+    root.right.right = TreeNode(6)
+    assert level_order_traversal(root) == [1, 2, 3, 4, 5, 6], "Test Case 1 Failed"
+    
+    # Test Case 2: Empty tree
+    empty_tree = None
+    assert level_order_traversal(empty_tree) == [], "Test Case 2 Failed"
+    
+    # Test Case 3: Single node tree
+    single_node = TreeNode(1)
+    assert level_order_traversal(single_node) == [1], "Test Case 3 Failed"
+    
+    # Test Case 4: Left-skewed tree
+    left_skewed = TreeNode(1)
+    left_skewed.left = TreeNode(2)
+    left_skewed.left.left = TreeNode(3)
+    left_skewed.left.left.left = TreeNode(4)
+    assert level_order_traversal(left_skewed) == [1, 2, 3, 4], "Test Case 4 Failed"
+    
+    # Test Case 5: Right-skewed tree
+    right_skewed = TreeNode(1)
+    right_skewed.right = TreeNode(2)
+    right_skewed.right.right = TreeNode(3)
+    right_skewed.right.right.right = TreeNode(4)
+    assert level_order_traversal(right_skewed) == [1, 2, 3, 4], "Test Case 5 Failed"
+
+    print("All test cases passed!")
+
+# Run tests
+test_level_order_traversal()
+
+
+
+Ejercicio 5:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
