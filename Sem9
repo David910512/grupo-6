@@ -1,0 +1,552 @@
+Lab09: Generic and Expression Trees
+Capacidades
+Definir las reglas de ejecución de árboles genéricos y expresión.
+Ejecutar operaciones matemáticas básicas en árboles de expresión.
+
+Seguridad
+Generar un ambiente seguro.
+Evitar el consumo de alimentos.
+Dejar el ambiente ordenado y limpio.
+
+Preparación
+El alumno debe revisar previamente el material cargado.
+
+Recursos
+Computadora.
+
+Instrucciones
+Se debe distribuir el desarrollo del laboratorio entre los integrantes.
+Subir el proyecto en un solo repositorio de GitHub.
+Poner evidencia de su proyecto finalizando en la sección de desarrollo con el siguiente formato.
+Nombre del alumno
+Título del desarrollo
+Captura del resultado
+Prompt engineering (Si aplica)
+Prompt ingresado y/o captura
+Prompt de interacción  y/o captura
+Código
+Código desarrollado (Diagrama opcional)
+Explicación de línea por línea con comentarios
+Casos de prueba
+Todo debe ser desarrollado en inglés.
+Captura de la estructura de tu proyecto en VSC.
+
+
+
+Ejercicio 1:
+
+-The code implements a function called infix_to_postfix that converts a mathematical expression written in infix notation (like 2 + 3 * 4) into its equivalent in postfix notation or Reverse Polish 
+Notation (like 2 3 4 * +). It uses a stack to properly handle operator precedence and parentheses. As it iterates through each token in the expression, it directly adds numbers to the output, manages
+operators based on their precedence, and processes parentheses to ensure correct evaluation order. At the end, any remaining operators in the stack are appended to the result. The test_infix_to_postfix 
+function verifies that the conversion works correctly across multiple test cases.
+
+
+ef infix_to_postfix(tokens):
+    precedence = {'+': 1, '-': 1, '*': 2, '/': 2}
+    output = []
+    stack = []
+
+    for token in tokens:
+        if token.isnumeric():  # Operand
+            output.append(token)
+        elif token == '(':  # Left parenthesis
+            stack.append(token)
+        elif token == ')':  # Right parenthesis
+            while stack and stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()  # Remove '('
+        else:  # Operator
+            while stack and stack[-1] != '(' and precedence.get(token, 0) <= precedence.get(stack[-1], 0):
+                output.append(stack.pop())
+            stack.append(token)
+
+    while stack:
+        output.append(stack.pop())
+
+    return output
+
+def test_infix_to_postfix():
+    assert infix_to_postfix(['2', '+', '3']) == ['2', '3', '+']
+    assert infix_to_postfix(['2', '+', '3', '*', '4']) == ['2', '3', '4', '*', '+']
+    assert infix_to_postfix(['(', '2', '+', '3', ')', '*', '4']) == ['2', '3', '+', '4', '*']
+    assert infix_to_postfix(['(', '5', '+', '3', ')', '*', '(', '10', '-', '8', ')']) == ['5', '3', '+', '10', '8', '-', '*']
+    assert infix_to_postfix(['(', '(', '2', '+', '3', ')', '*', '4', ')', '-', '5']) == ['2', '3', '+', '4', '*', '5', '-']
+    print("✅ All test cases passed.")
+
+# Ejecutar los tests
+test_infix_to_postfix()
+
+Ejercicio 2 :
+
+-This code builds an expression tree from a list of tokens in infix notation (such as ['2', '+', '3']) using two main steps: first, it converts the infix expression to postfix notation using 
+the infix_to_postfix function, which handles operator precedence and parentheses with a stack; then, using the resulting postfix expression, the build_tree_from_infix function constructs the binary 
+expression tree with another stack, where operands become leaf nodes and each operator becomes a node with two children (left and right). Additionally, the code includes helper functions like compare_trees 
+to verify tree structure and manual_tree to manually create expected trees, allowing for automated testing that ensures correctness of the expression tree construction.
+
+class TreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def infix_to_postfix(tokens):
+    precedence = {'+': 1, '-': 1, '*': 2, '/': 2}
+    output = []
+    stack = []
+
+    for token in tokens:
+        if token.isnumeric():
+            output.append(token)
+        elif token == '(':
+            stack.append(token)
+        elif token == ')':
+            while stack and stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()  # remove '('
+        else:
+            while stack and stack[-1] != '(' and precedence[token] <= precedence[stack[-1]]:
+                output.append(stack.pop())
+            stack.append(token)
+
+    while stack:
+        output.append(stack.pop())
+
+    return output
+
+def build_tree_from_infix(tokens):
+    postfix = infix_to_postfix(tokens)
+    stack = []
+
+    for token in postfix:
+        if token.isnumeric():
+            stack.append(TreeNode(token))
+        else:
+            node = TreeNode(token)
+            node.right = stack.pop()
+            node.left = stack.pop()
+            stack.append(node)
+
+    return stack[0]
+
+# Helper: Tree comparison
+def compare_trees(node1, node2):
+    if not node1 and not node2:
+        return True
+    if not node1 or not node2:
+        return False
+    return (
+        node1.value == node2.value and
+        compare_trees(node1.left, node2.left) and
+        compare_trees(node1.right, node2.right)
+    )
+
+# Helper: Build tree manually for test comparison
+def manual_tree(value, left=None, right=None):
+    root = TreeNode(value)
+    root.left = left
+    root.right = right
+    return root
+
+# TEST CASES
+def test_build_tree_from_infix():
+    # Test Case 1
+    expected = manual_tree('+', TreeNode('2'), TreeNode('3'))
+    assert compare_trees(build_tree_from_infix(['2', '+', '3']), expected)
+
+    # Test Case 2
+    expected = manual_tree('+',
+                TreeNode('2'),
+                manual_tree('*', TreeNode('3'), TreeNode('4')))
+    assert compare_trees(build_tree_from_infix(['2', '+', '3', '*', '4']), expected)
+
+    # Test Case 3
+    expected = manual_tree('*',
+                manual_tree('+', TreeNode('2'), TreeNode('3')),
+                TreeNode('4'))
+    assert compare_trees(build_tree_from_infix(['(', '2', '+', '3', ')', '*', '4']), expected)
+
+    # Test Case 4
+    expected = manual_tree('-',
+                manual_tree('*',
+                    TreeNode('5'),
+                    manual_tree('+', TreeNode('3'), TreeNode('2'))),
+                TreeNode('10'))
+    assert compare_trees(build_tree_from_infix(['5', '*', '(', '3', '+', '2', ')', '-', '10']), expected)
+
+    # Test Case 5
+    expected = manual_tree('/',
+                manual_tree('/',
+                    TreeNode('8'),
+                    TreeNode('4')),
+                TreeNode('2'))
+    assert compare_trees(build_tree_from_infix(['8', '/', '4', '/', '2']), expected)
+
+    print("✅ All expression tree tests passed.")
+
+# Ejecutar pruebas
+test_build_tree_from_infix()
+
+Ejercicio 3:
+
+Problem: Implement a function to find the height (maximum depth) of a generic tree. 📏
+Input: The root node of a generic tree
+Output: The height of the tree (integer)
+
+Clase del nodo del árbol genérico
+class GenericTreeNode:
+    def _init_(self, value):
+        self.value = value
+        self.children = []
+
+    def add_child(self, node):
+        self.children.append(node)
+
+# Función para calcular la altura del árbol genérico
+def tree_height(root):
+    """Calcula la altura (profundidad máxima) de un árbol genérico. 📏"""
+    if root is None:
+        return 0
+    if not root.children:
+        return 1
+    return 1 + max(tree_height(child) for child in root.children)
+
+# Función de prueba detallada con impresión de resultados
+def test_tree_height_verbose():
+    """Prueba de altura del árbol genérico con resultados detallados. 📊"""
+
+    def run_test(name, root, expected):
+        result = tree_height(root)
+        print(f"{name}:")
+        print(f"  ➤ Esperado: {expected}")
+        print(f"  ➤ Obtenido: {result}")
+        print(f"  {'✅ Pasó' if result == expected else '❌ Falló'}\n")
+
+    # Caso 1: Árbol vacío
+    test1_root = None
+    run_test("Caso 1: Árbol vacío", test1_root, 0)
+
+    # Caso 2: Un solo nodo
+    test2_root = GenericTreeNode('A')
+    run_test("Caso 2: Un solo nodo", test2_root, 1)
+
+    # Caso 3: Árbol lineal A -> B -> C -> D
+    test3_root = GenericTreeNode('A')
+    test3_b = GenericTreeNode('B')
+    test3_c = GenericTreeNode('C')
+    test3_d = GenericTreeNode('D')
+    test3_root.add_child(test3_b)
+    test3_b.add_child(test3_c)
+    test3_c.add_child(test3_d)
+    run_test("Caso 3: Árbol lineal", test3_root, 4)
+
+    # Caso 4: Árbol balanceado
+    #     A
+    #   / | \
+    #  B  C  D
+    # /|\     \
+    # E F G    H
+    test4_root = GenericTreeNode('A')
+    test4_b = GenericTreeNode('B')
+    test4_c = GenericTreeNode('C')
+    test4_d = GenericTreeNode('D')
+    test4_e = GenericTreeNode('E')
+    test4_f = GenericTreeNode('F')
+    test4_g = GenericTreeNode('G')
+    test4_h = GenericTreeNode('H')
+    test4_root.add_child(test4_b)
+    test4_root.add_child(test4_c)
+    test4_root.add_child(test4_d)
+    test4_b.add_child(test4_e)
+    test4_b.add_child(test4_f)
+    test4_b.add_child(test4_g)
+    test4_d.add_child(test4_h)
+    run_test("Caso 4: Árbol balanceado", test4_root, 3)
+
+    # Caso 5: Árbol desbalanceado
+    #     A
+    #    / \
+    #   B   C
+    #  /     \
+    # D       E
+    #/         \
+    #F          G
+    test5_root = GenericTreeNode('A')
+    test5_b = GenericTreeNode('B')
+    test5_c = GenericTreeNode('C')
+    test5_d = GenericTreeNode('D')
+    test5_e = GenericTreeNode('E')
+    test5_f = GenericTreeNode('F')
+    test5_g = GenericTreeNode('G')
+    test5_root.add_child(test5_b)
+    test5_root.add_child(test5_c)
+    test5_b.add_child(test5_d)
+    test5_c.add_child(test5_e)
+    test5_d.add_child(test5_f)
+    test5_e.add_child(test5_g)
+    run_test("Caso 5: Árbol desbalanceado", test5_root, 4)
+
+# Ejecutar pruebas detalladas
+test_tree_height_verbose()
+
+
+Ejercicio 4:
+This program defines a generic tree structure and implements a recursive function to find all leaf nodes — nodes that do not have any children. It includes several test cases to verify the correctness o
+f the function across different tree shapes, such as empty trees, single-node trees, linear trees, balanced trees, and complex nested trees.
+
+class GenericTreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.children = [] 
+
+
+    def add_child(self, child_node):
+        self.children.append(child_node)
+
+def find_leaves(root):
+    if root is None:
+        return []
+    
+    if not root.children:  
+        return [root.value]
+
+    leaves = [] 
+    for child in root.children:
+        leaves.extend(find_leaves(child))
+    return leaves
+
+# Test Cases
+def test_find_leaves():
+    
+    # Test Case 1: Empty tree
+    test1_root = None
+    test1_expected = []
+    assert find_leaves(test1_root) == test1_expected
+
+    # Test Case 2: Single node (root is leaf)
+    test2_root = GenericTreeNode('A')
+    test2_expected = ['A']
+    assert find_leaves(test2_root) == test2_expected
+
+    # Test Case 3: Linear tree
+    test3_root = GenericTreeNode('A')
+    test3_b = GenericTreeNode('B')
+    test3_c = GenericTreeNode('C')
+    test3_root.add_child(test3_b)
+    test3_b.add_child(test3_c)
+    test3_expected = ['C']
+    assert find_leaves(test3_root) == test3_expected
+
+    # Test Case 4: Balanced tree
+    test4_root = GenericTreeNode('A')
+    test4_b = GenericTreeNode('B')
+    test4_c = GenericTreeNode('C')
+    test4_d = GenericTreeNode('D')
+    test4_e = GenericTreeNode('E')
+    test4_f = GenericTreeNode('F')
+    test4_g = GenericTreeNode('G')
+    test4_h = GenericTreeNode('H')
+    test4_root.add_child(test4_b)
+    test4_root.add_child(test4_c)
+    test4_root.add_child(test4_d)
+    test4_b.add_child(test4_e)
+    test4_b.add_child(test4_f)
+    test4_b.add_child(test4_g)
+    test4_d.add_child(test4_h)
+    test4_expected = sorted(['E', 'F', 'G', 'C', 'H'])
+    assert sorted(find_leaves(test4_root)) == test4_expected
+
+    # Test Case 5: Complex tree
+    test5_root = GenericTreeNode('A')
+    test5_b = GenericTreeNode('B')
+    test5_c = GenericTreeNode('C')
+    test5_d = GenericTreeNode('D')
+    test5_e = GenericTreeNode('E')
+    test5_f = GenericTreeNode('F')
+    test5_g = GenericTreeNode('G')
+    test5_h = GenericTreeNode('H')
+    test5_i = GenericTreeNode('I')
+    test5_j = GenericTreeNode('J')
+    test5_k = GenericTreeNode('K')
+    test5_root.add_child(test5_b)
+    test5_root.add_child(test5_c)
+    test5_root.add_child(test5_d)
+    test5_b.add_child(test5_e)
+    test5_b.add_child(test5_f)
+    test5_d.add_child(test5_g)
+    test5_e.add_child(test5_h)
+    test5_f.add_child(test5_i)
+    test5_f.add_child(test5_j)
+    test5_f.add_child(test5_k)
+    test5_expected = sorted(['H', 'I', 'J', 'K', 'C', 'G'])
+    assert sorted(find_leaves(test5_root)) == test5_expected
+
+    print("✅ All test cases passed!")
+
+test_find_leaves()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ejercicio 5:
+-When the code is run, mathematical expression trees composed of operators and operands are constructed and simplified, demonstrating how subtrees containing only constants can be reduced. In the test 
+cases, various expressions are evaluated: some are completely simplified (such as (2 + 3) * 4 which gives 20 and ((2 * 3) + (4 - 1)) * 5 which gives 45), others only partially (such as (2 + 3) * x 
+which becomes (5 * x)), and some cannot be simplified due to the presence of variables (such as (x + y) * z). Overall, the code shows how to apply partial evaluation of arithmetic expressions using binary 
+trees and demonstrates correct operation in all cases.
+
+class ExpressionNode:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def is_constant(value):
+    try:
+        float(value)
+        return True
+    except ValueError:
+        return False
+
+def simplify_expression(node):
+    if node is None:
+        return None
+
+    # Si el nodo es hoja (número o variable), lo devolvemos tal cual
+    if node.left is None and node.right is None:
+        return node
+
+    # Simplificamos recursivamente los subárboles
+    node.left = simplify_expression(node.left)
+    node.right = simplify_expression(node.right)
+
+    # Verificamos si ambos lados son constantes
+    if node.left and node.right and is_constant(node.left.value) and is_constant(node.right.value):
+        left_val = float(node.left.value)
+        right_val = float(node.right.value)
+
+        try:
+            if node.value == '+':
+                result = left_val + right_val
+            elif node.value == '-':
+                result = left_val - right_val
+            elif node.value == '*':
+                result = left_val * right_val
+            elif node.value == '/':
+                result = left_val / right_val
+            else:
+                return node  # operador no reconocido
+            # Reemplazar el nodo por uno nuevo con el resultado
+            return ExpressionNode(str(int(result)) if result.is_integer() else str(result))
+        except ZeroDivisionError:
+            return node  # no se puede simplificar
+
+    return node  # no se puede simplificar más
+
+def print_expression(node):
+    """Imprime la expresión en forma infija legible."""
+    if node is None:
+        return ""
+    if node.left is None and node.right is None:
+        return node.value
+    left = print_expression(node.left)
+    right = print_expression(node.right)
+    return f"({left} {node.value} {right})"
+
+def test_simplify_expression():
+    print("Test Case 1:")
+    test1_root = ExpressionNode('*')
+    test1_add = ExpressionNode('+')
+    test1_2 = ExpressionNode('2')
+    test1_3 = ExpressionNode('3')
+    test1_4 = ExpressionNode('4')
+    test1_add.left = test1_2
+    test1_add.right = test1_3
+    test1_root.left = test1_add
+    test1_root.right = test1_4
+    simplified = simplify_expression(test1_root)
+    print("Result:", print_expression(simplified))  # Esperado: 20
+
+    print("\nTest Case 2:")
+    test2_root = ExpressionNode('*')
+    test2_add = ExpressionNode('+')
+    test2_2 = ExpressionNode('2')
+    test2_3 = ExpressionNode('3')
+    test2_x = ExpressionNode('x')
+    test2_add.left = test2_2
+    test2_add.right = test2_3
+    test2_root.left = test2_add
+    test2_root.right = test2_x
+    simplified = simplify_expression(test2_root)
+    print("Result:", print_expression(simplified))  # Esperado: (5 * x)
+
+    print("\nTest Case 3:")
+    test3_root = ExpressionNode('*')
+    test3_add = ExpressionNode('+')
+    test3_x = ExpressionNode('x')
+    test3_y = ExpressionNode('y')
+    test3_z = ExpressionNode('z')
+    test3_add.left = test3_x
+    test3_add.right = test3_y
+    test3_root.left = test3_add
+    test3_root.right = test3_z
+    simplified = simplify_expression(test3_root)
+    print("Result:", print_expression(simplified))  # Esperado: ((x + y) * z)
+
+    print("\nTest Case 4:")
+    test4_root = ExpressionNode('*')
+    test4_add = ExpressionNode('+')
+    test4_mult = ExpressionNode('*')
+    test4_sub = ExpressionNode('-')
+    test4_2 = ExpressionNode('2')
+    test4_3 = ExpressionNode('3')
+    test4_4 = ExpressionNode('4')
+    test4_1 = ExpressionNode('1')
+    test4_5 = ExpressionNode('5')
+    test4_mult.left = test4_2
+    test4_mult.right = test4_3
+    test4_sub.left = test4_4
+    test4_sub.right = test4_1
+    test4_add.left = test4_mult
+    test4_add.right = test4_sub
+    test4_root.left = test4_add
+    test4_root.right = test4_5
+    simplified = simplify_expression(test4_root)
+    print("Result:", print_expression(simplified))  # Esperado: 45
+
+    print("\nTest Case 5:")
+    test5_root = ExpressionNode('*')
+    test5_add1 = ExpressionNode('+')
+    test5_add2 = ExpressionNode('+')
+    test5_x = ExpressionNode('x')
+    test5_5a = ExpressionNode('5')
+    test5_3 = ExpressionNode('3')
+    test5_2 = ExpressionNode('2')
+    test5_add1.left = test5_x
+    test5_add1.right = test5_5a
+    test5_add2.left = test5_3
+    test5_add2.right = test5_2
+    test5_root.left = test5_add1
+    test5_root.right = test5_add2
+    simplified = simplify_expression(test5_root)
+    print("Result:", print_expression(simplified))  # Esperado: ((x + 5) * 5)
+
+test_simplify_expression()
