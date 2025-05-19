@@ -76,6 +76,13 @@ def test_infix_to_postfix():
 # Ejecutar los tests
 test_infix_to_postfix()
 
+
+
+
+
+
+
+
 Ejercicio 2 :
 
 -This code builds an expression tree from a list of tokens in infix notation (such as ['2', '+', '3']) using two main steps: first, it converts the infix expression to postfix notation using 
@@ -185,6 +192,13 @@ def test_build_tree_from_infix():
 
 # Ejecutar pruebas
 test_build_tree_from_infix()
+
+
+
+
+
+
+
 
 Ejercicio 3:
 
