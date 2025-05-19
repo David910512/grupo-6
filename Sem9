@@ -41,7 +41,7 @@ operators based on their precedence, and processes parentheses to ensure correct
 function verifies that the conversion works correctly across multiple test cases.
 
 
-ef infix_to_postfix(tokens):
+Def infix_to_postfix(tokens):
     precedence = {'+': 1, '-': 1, '*': 2, '/': 2}
     output = []
     stack = []
