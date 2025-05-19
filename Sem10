@@ -1,0 +1,476 @@
+Lab10: Generic and Expression Trees
+Capacidades
+Definir las reglas de ejecución de árboles genéricos y expresión.
+Ejecutar operaciones matemáticas básicas en árboles de expresión.
+
+Seguridad
+Generar un ambiente seguro.
+Evitar el consumo de alimentos.
+Dejar el ambiente ordenado y limpio.
+
+Preparación
+El alumno debe revisar previamente el material cargado.
+
+Recursos
+Computadora.
+
+Instrucciones
+Se debe distribuir el desarrollo del laboratorio entre los integrantes.
+Subir el proyecto en un solo repositorio de GitHub.
+Poner evidencia de su proyecto finalizando en la sección de desarrollo con el siguiente formato.
+Nombre del alumno
+Título del desarrollo
+Captura del resultado
+Prompt engineering (Si aplica)
+Prompt ingresado y/o captura
+Prompt de interacción  y/o captura
+Código
+Código desarrollado (Diagrama opcional)
+Explicación de línea por línea con comentarios
+Casos de prueba
+Todo debe ser desarrollado en inglés.
+Captura de la estructura de tu proyecto en VSC.
+
+Ejercicio 1:
+-The function infix_to_postfix(tokens) converts an infix expression (like "2 + 3 * 4") into a postfix expression (also known as Reverse Polish Notation, like "2 3 4 * +").
+This format is useful in computing because it removes the need for parentheses and is easier for machines to evaluate using a stack.
+
+def infix_to_postfix(tokens):
+    """Convert infix expression to postfix notation"""
+    precedence = {'+': 1, '-': 1, '*': 2, '/': 2}
+    output = []
+    stack = []
+
+    for token in tokens:
+        if token.isalnum():  # operand (número o letra)
+            output.append(token)
+        elif token in precedence:  # operador
+            while (stack and stack[-1] != '(' and
+                   precedence.get(stack[-1], 0) >= precedence[token]):
+                output.append(stack.pop())
+            stack.append(token)
+        elif token == '(':
+            stack.append(token)
+        elif token == ')':
+            while stack and stack[-1] != '(':
+                output.append(stack.pop())
+            stack.pop()  # descarta el paréntesis izquierdo
+
+    while stack:
+        output.append(stack.pop())
+
+    return output
+# Test 1: Simple addition
+# Infix: 2 + 3 → Postfix: 2 3 +
+print(infix_to_postfix(['2', '+', '3']) == ['2', '3', '+'])
+
+# Test 2: Operator precedence
+# Infix: 2 + 3 * 4 → Postfix: 2 3 4 * +
+# * tiene más prioridad que +, por eso se agrupa 3 * 4 antes de sumar 2
+print(infix_to_postfix(['2', '+', '3', '*', '4']) == ['2', '3', '4', '*', '+'])
+
+# Test 3: Parentheses override precedence
+# Infix: (2 + 3) * 4 → Postfix: 2 3 + 4 *
+# Los paréntesis hacen que se sume primero (2+3), luego se multiplica
+print(infix_to_postfix(['(', '2', '+', '3', ')', '*', '4']) == ['2', '3', '+', '4', '*'])
+
+# Test 4: Complex expression with two groups
+# Infix: (1 + 2) * (3 - 4) → Postfix: 1 2 + 3 4 - *
+print(infix_to_postfix(['(', '1', '+', '2', ')', '*', '(', '3', '-', '4', ')']) == ['1', '2', '+', '3', '4', '-', '*'])
+
+# Test 5: Multiple operators and variables
+# Infix: a + b * c / d → Postfix: a b c * d / +
+# Se respeta: primero b * c, luego ese resultado se divide entre d, y luego se suma a a
+print(infix_to_postfix(['a', '+', 'b', '*', 'c', '/', 'd']) == ['a', 'b', 'c', '*', 'd', '/', '+'])
+
+
+
+
+
+
+
+Ejercicio 2:
+
+-This program builds an expression tree from a given postfix expression (also known as Reverse Polish Notation). Each operand becomes a leaf node, and each operator becomes an internal node with 
+two children. The program processes the postfix tokens using a stack to construct the tree structure, allowing complex mathematical expressions to be represented hierarchically. It then tests whether
+the tree has been built correctly by checking the root and child node values for various postfix input cases.
+
+
+class Node:
+    
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def build_expression_tree(postfix):
+    
+    stack = []
+    operators = {'+', '-', '*', '/'}
+
+    for token in postfix:
+        if token not in operators:
+            
+            stack.append(Node(token))
+        else:
+            
+            right = stack.pop()
+            left = stack.pop()
+            new_node = Node(token)
+            new_node.left = left
+            new_node.right = right
+            stack.append(new_node)
+
+
+    return stack[0]  # 
+
+# ✅ Test cases
+tokens1 = ['2', '3', '+']
+tree1 = build_expression_tree(tokens1)
+print(tree1.value == '+' and tree1.left.value == '2' and tree1.right.value == '3')  # True
+
+tokens2 = ['2', '3', '4', '*', '+']
+tree2 = build_expression_tree(tokens2)
+print(tree2.value == '+' and tree2.left.value == '2' and tree2.right.value == '*')  # True
+
+tokens3 = ['1', '2', '+', '3', '4', '-', '*']
+tree3 = build_expression_tree(tokens3)
+print(tree3.value == '*' and tree3.left.value == '+' and tree3.right.value == '-')  # True
+
+tokens4 = ['a', 'b', 'c', '*', '+']
+tree4 = build_expression_tree(tokens4)
+print(tree4.value == '+' and tree4.left.value == 'a' and tree4.right.value == '*')  # True
+
+tokens5 = ['a', 'b', '+', 'c', 'd', '-', '/']
+tree5 = build_expression_tree(tokens5)
+print(tree5.value == '/' and tree5.left.value == '+' and tree5.right.value == '-')  # True
+
+
+
+
+
+
+
+
+Ejercicio 3:
+-Prompt Engineering 
+Prompt:
+ "Challenge 3: Evaluate an expression tree containing integer values and basic arithmetic operations using post-order traversal."
+
+class Node:
+    def _init_(self, value):
+        self.value = value          # The value can be an integer or an operator symbol
+        self.left = None            # Pointer to the left child node
+        self.right = None           # Pointer to the right child node
+
+def evaluate_expression_tree(root):
+    """Evaluate an expression tree and return the numerical result."""
+    if root is None:
+        return 0                    # If the tree is empty, return 0
+
+    if root.left is None and root.right is None:
+        return int(root.value)     # Leaf node: convert and return the integer value
+
+    # Recursively evaluate left and right children
+    left_val = evaluate_expression_tree(root.left)
+    right_val = evaluate_expression_tree(root.right)
+
+    # Perform the corresponding operation
+    if root.value == '+':
+        return left_val + right_val
+    elif root.value == '-':
+        return left_val - right_val
+    elif root.value == '*':
+        return left_val * right_val
+    elif root.value == '/':
+        return left_val // right_val if right_val != 0 else 0  # Prevent division by zero
+    else:
+        raise ValueError(f"Unknown operator: {root.value}")  # Handle unsupported operators
+
+# Test 1: Simple addition -> 2 + 3 = 5
+node1 = Node('+')
+node1.left = Node('2')
+node1.right = Node('3')
+print(evaluate_expression_tree(node1) == 5)
+
+# Test 2: Multiplication -> 4 * 5 = 20
+node2 = Node('*')
+node2.left = Node('4')
+node2.right = Node('5')
+print(evaluate_expression_tree(node2) == 20)
+
+# Test 3: Combined operations -> 2 + (3 * 4) = 14
+node3 = Node('+')
+node3.left = Node('2')
+node3.right = Node('*')
+node3.right.left = Node('3')
+node3.right.right = Node('4')
+print(evaluate_expression_tree(node3) == 14)
+
+# Test 4: Division -> 8 / 4 = 2
+node4 = Node('/')
+node4.left = Node('8')
+node4.right = Node('4')
+print(evaluate_expression_tree(node4) == 2)
+
+# Test 5: Complex expression -> (1 + 2) * (8 - 3) = 3 * 5 = 15
+node5 = Node('*')
+node5.left = Node('+')
+node5.right = Node('-')
+node5.left.left = Node('1')
+node5.left.right = Node('2')
+node5.right.left = Node('8')
+node5.right.right = Node('3')
+print(evaluate_expression_tree(node5) == 15)
+
+
+
+
+
+
+
+
+
+Ejercicio 4:
+-This code defines a binary tree using the Node class and implements three standard tree traversal algorithms: inorder (left → root → right), preorder (root → left → right), and postorder 
+(left → right → root). Each traversal is implemented recursively and returns a list of node values in the respective order. The code then builds several example trees, such as arithmetic
+expression trees, and verifies the correctness of each traversal by comparing the result with the expected output. This demonstrates how traversal order affects the way we read or process 
+the contents of a binary tree.
+
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def inorder_traversal(root):
+    """Perform inorder traversal (left, root, right)"""
+    if root is None:
+        return []
+    return inorder_traversal(root.left) + [root.value] + inorder_traversal(root.right)
+
+def preorder_traversal(root):
+    """Perform preorder traversal (root, left, right)"""
+    if root is None:
+        return []
+    return [root.value] + preorder_traversal(root.left) + preorder_traversal(root.right)
+
+def postorder_traversal(root):
+    """Perform postorder traversal (left, right, root)"""
+    if root is None:
+        return []
+    return postorder_traversal(root.left) + postorder_traversal(root.right) + [root.value]
+
+node1 = Node('+')
+node1.left = Node('2')
+node1.right = Node('3')
+print(inorder_traversal(node1) == ['2', '+', '3'])     
+print(preorder_traversal(node1) == ['+', '2', '3'])    
+print(postorder_traversal(node1) == ['2', '3', '+'])   
+
+node2 = Node('+')
+node2.left = Node('*')
+node2.right = Node('5')
+node2.left.left = Node('2')
+node2.left.right = Node('3')
+print(inorder_traversal(node2) == ['2', '*', '3', '+', '5'])   
+print(preorder_traversal(node2) == ['+', '*', '2', '3', '5'])   
+print(postorder_traversal(node2) == ['2', '3', '*', '5', '+'])  
+
+node3 = Node('X')
+print(inorder_traversal(node3) == ['X'])
+print(preorder_traversal(node3) == ['X'])     
+print(postorder_traversal(node3) == ['X'])      
+
+print(inorder_traversal(None) == [])        
+print(preorder_traversal(None) == [])       
+print(postorder_traversal(None) == [])          
+
+node5 = Node('/')
+node5.left = Node('+')
+node5.right = Node('-')
+node5.left.left = Node('a')
+node5.left.right = Node('b')
+node5.right.left = Node('c')
+node5.right.right = Node('d')
+print(inorder_traversal(node5) == ['a', '+', 'b', '/', 'c', '-', 'd'])        
+print(preorder_traversal(node5) == ['/', '+', 'a', 'b', '-', 'c', 'd'])        
+print(postorder_traversal(node5) == ['a', 'b', '+', 'c', 'd', '-', '/'])      
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ejercicio 5:
+
+-This code defines a binary expression tree and implements a function to simplify it by evaluating constant subtrees using post-order traversal. The function simplify_expression_tree checks 
+if both the left and right children of a node are numeric; if so, it computes the result using the operator at the current node and replaces the entire subtree with a single node containing 
+the computed value. If the node contains variables or a mix of constants and variables, it preserves the structure. The code also includes multiple test cases to verify that full, partial, or 
+no simplification is correctly applied based on the contents of each subtree.
+
+
+
+class Node:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+
+def simplify_expression_tree(root):
+    """Simplify expression tree by evaluating constant subtrees"""
+    if root is None:
+        return None
+
+    # Simplify left and right subtrees first (post-order)
+    root.left = simplify_expression_tree(root.left)
+    root.right = simplify_expression_tree(root.right)
+
+    # Try to simplify if both children are numeric constants
+    if root.left and root.right and root.left.value.isdigit() and root.right.value.isdigit():
+        a = int(root.left.value)
+        b = int(root.right.value)
+        op = root.value
+
+        try:
+            if op == '+':
+                result = a + b
+            elif op == '-':
+                result = a - b
+            elif op == '*':
+                result = a * b
+            elif op == '/':
+                result = a // b  # Integer division
+            else:
+                return root  # Unknown operator
+        except ZeroDivisionError:
+            return root  # Do not simplify if division by zero
+
+        return Node(str(result))  # Replace subtree with computed value
+
+    return root  # Return original node if not fully simplifiable
+
+# ------------------------
+# ✅ TEST CASES
+# ------------------------
+
+print("Running test cases...\n")
+
+# Test 1: All constants → should simplify to a single value
+node1 = Node('+')
+node1.left = Node('2')
+node1.right = Node('3')
+result1 = simplify_expression_tree(node1)
+print("Test 1:", result1.value == '5' and result1.left is None and result1.right is None)
+
+# Test 2: Mixed variable and constant → no simplification
+node2 = Node('+')
+node2.left = Node('x')
+node2.right = Node('3')
+result2 = simplify_expression_tree(node2)
+print("Test 2:", result2.value == '+' and result2.left.value == 'x' and result2.right.value == '3')
+
+
+# Test 4: All variables → no simplification
+node4 = Node('+')
+node4.left = Node('x')
+node4.right = Node('y')
+result4 = simplify_expression_tree(node4)
+print("Test 4:", result4.value == '+' and result4.left.value == 'x' and result4.right.value == 'y')
+
+# Test 5: Complex nested simplification
+# Tree:         +
+#             /   \
+#            /     \
+#           /       \
+#          /         \
+#         /           \
+#        /             \
+#       /               \
+#      /                 \
+#     /                   \
+#    /                     \
+#   /                       \
+#  /                         \
+#  /                         *
+#  / \                     /   \
+# 10  2                   z     4
+node5 = Node('+')
+node5.left = Node('/')
+node5.right = Node('*')
+node5.left.left = Node('10')
+node5.left.right = Node('2')
+node5.right.left = Node('z')
+node5.right.right = Node('4')
+result5 = simplify_expression_tree(node5)
+print("Test 5:", result5.value == '+' and result5.left.value == '5' and 
+      result5.right.value == '*' and result5.right.left.value == 'z' and result5.right.right.value == '4')
+
+print("\n✅ All tests completed.")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Ejercicio 5:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
