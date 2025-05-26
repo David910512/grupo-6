@@ -1,0 +1,364 @@
+Ejercicio 1:
+
+-This code implements a function called range_query that searches for and returns all values within a specific range [min_val, max_val] from a Binary Search Tree (BST), 
+taking advantage of its sorted structure. First, the tree is built using the build_bst function, which inserts each value into its correct position according to BST rules. Then, the range_query 
+function performs an in-order traversal (left, node, right), only visiting branches where values within the range might exist. During the traversal, it collects all values that fall within the
+specified range and returns them in sorted order. Finally, several test cases are included to verify that the function behaves correctly in different scenarios, such as normal ranges, empty results,
+or trees with a single node.
+
+
+
+def build_bst(values):
+    root = None
+    for val in values:
+        root = insert(root, val)
+    return root
+
+def range_query(root, min_val, max_val):
+    """Find all values in BST within given range"""
+    result = []
+
+    def inorder(node):
+        if not node:
+            return
+
+        # Visita izquierda si puede haber valores menores
+        if node.val > min_val:
+            inorder(node.left)
+
+        # Agrega si está dentro del rango
+        if min_val <= node.val <= max_val:
+            result.append(node.val)
+
+        # Visita derecha si puede haber valores mayores
+        if node.val < max_val:
+            inorder(node.right)
+
+    inorder(root)
+    return result
+
+# ✅ Casos de prueba
+print(range_query(build_bst([7, 3, 11, 1, 5, 9, 13]), 5, 10) == [5, 7, 9])        # 🎯 Normal range
+print(range_query(build_bst([6, 4, 8, 2]), 1, 10) == [2, 4, 6, 8])                # 📊 Full range
+print(range_query(build_bst([20, 10, 30]), 1, 5) == [])                           # 📭 Sin valores
+print(range_query(build_bst([15]), 10, 20) == [15])                               # 🌱 Nodo único
+print(range_query(build_bst([15, 10, 20, 5, 25]), 10, 20) == [10, 15, 20])        # 🔗 Incluye límites
+
+
+
+
+
+
+Ejercicio 2:
+-This code defines a function called find_lca that finds the Lowest Common Ancestor (LCA) of two values in a Binary Search Tree (BST). It starts from the root and traverses the tree by comparing the
+two target values with the current node. If both values are smaller, it moves left; if both are larger, it moves right. When the values split—meaning one is on the left and the other on the right, or 
+one is equal to the current node—that node is the LCA. The code also includes helper functions to build a BST from a list and several test cases to verify the function works correctly in different 
+scenarios, such as values in separate subtrees, one value being the ancestor of the other, or both values being the same.
+
+# Definición del nodo del árbol
+class TreeNode:
+    def __init__(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+
+# Función para insertar un valor en el BST
+def insert(root, val):
+    if root is None:
+        return TreeNode(val)
+    if val < root.val:
+        root.left = insert(root.left, val)
+    else:
+        root.right = insert(root.right, val)
+    return root
+
+# Construcción del árbol a partir de una lista
+def build_bst(values):
+    root = None
+    for val in values:
+        root = insert(root, val)
+    return root
+
+# -----------------------------
+# 🎯 Función principal: encontrar el LCA
+# -----------------------------
+
+def find_lca(root, val1, val2):
+    """Encuentra el ancestro común más cercano de dos valores en un BST"""
+    while root:
+        if val1 < root.val and val2 < root.val:
+            root = root.left  # ambos están a la izquierda
+        elif val1 > root.val and val2 > root.val:
+            root = root.right  # ambos están a la derecha
+        else:
+            return root.val  # se separan: este es el LCA
+    return None  # Si el árbol está vacío o los valores no existen
+
+# -----------------------------
+# 🧪 Casos de prueba
+# -----------------------------
+
+# Caso 1: Los valores están en diferentes subárboles
+print(find_lca(build_bst([6, 2, 8, 0, 4, 7, 9, 3, 5]), 2, 8) == 6)  # 🌲 LCA = 6
+
+# Caso 2: Los valores están en el mismo subárbol
+print(find_lca(build_bst([6, 2, 8, 0, 4, 7, 9, 3, 5]), 0, 4) == 2)  # 📊 LCA = 2
+
+# Caso 3: Uno de los valores es ancestro del otro
+print(find_lca(build_bst([6, 2, 8, 0, 4, 7, 9, 3, 5]), 2, 3) == 2)  # 🔗 LCA = 2
+
+# Caso 4: Los valores son iguales
+print(find_lca(build_bst([5, 3, 7]), 5, 5) == 5)  # 🎯 LCA = 5
+
+# Caso 5: Los valores están al nivel de las hojas
+print(find_lca(build_bst([4, 2, 6, 1, 3, 5, 7]), 1, 3) == 2)  # 🌱 LCA = 2
+
+
+
+
+
+
+Ejercicio 3:
+-This program checks whether a binary tree satisfies the properties of a Binary Search Tree (BST), ensuring that each node has smaller values in its left subtree and greater values in its right subtree,
+using recursive validation with minimum and maximum bounds.
+
+class TreeNode:
+    def _init_(self, val, left=None, right=None):
+        self.val = val
+        self.left = left
+        self.right = right
+
+def is_valid_bst(root):
+
+    def helper(node, min_val, max_val):
+        if not node:
+            return True
+        if not (min_val < node.val < max_val):
+            return False
+        return (
+            helper(node.left, min_val, node.val) and
+            helper(node.right, node.val, max_val)
+        )
+    return helper(root, float('-inf'), float('inf'))
+
+def build_tree(values):
+    if not values:
+        return None
+    nodes = [TreeNode(v) if v is not None else None for v in values]
+    kids = nodes[::-1]
+    root = kids.pop()
+
+    #Asigna los hijos izquierdo y derecho a cada nodo, si existen.
+
+
+    for node in nodes:
+        if node:
+            if kids: node.left = kids.pop()
+            if kids: node.right = kids.pop()
+    return root
+
+
+
+
+#construir_árbol_inválido1
+
+def build_invalid_tree1():
+    root = TreeNode(5)
+    root.left = TreeNode(6)  # ❌ debe ser menor que 5
+    root.right = TreeNode(7)
+    return root
+
+def build_invalid_tree2():
+    root = TreeNode(5)
+    root.left = TreeNode(3)
+    root.right = TreeNode(4)  # ❌ debe ser mayor que 5
+    return root
+
+# ✅ Test cases
+print(is_valid_bst(build_tree([5, 3, 7, 2, 4, 6, 8])) == True)     
+print(is_valid_bst(build_invalid_tree1()) == False)              
+print(is_valid_bst(build_invalid_tree2()) == False)             
+print(is_valid_bst(build_tree([42])) == True)                     
+print(is_valid_bst(None) == True)
+
+
+
+
+
+
+
+
+Ejercicio 4:
+
+
+-Problem: Find the kth smallest element in a BST without converting to array.
+code:
+
+
+class TreeNode:
+    def _init_(self, val):
+        self.val = val
+        self.left = None
+        self.right = None
+
+def kth_smallest_from_list(values, k):
+    def insert_bst(root, val):
+        if root is None:
+            return TreeNode(val)
+        if val < root.val:
+            root.left = insert_bst(root.left, val)
+        else:
+            root.right = insert_bst(root.right, val)
+        return root
+
+    def build_bst(values):
+        root = None
+        for val in values:
+            root = insert_bst(root, val)
+        return root
+
+    def kth_smallest(root, k):
+        def inorder(node):
+            nonlocal count, result
+            if node is None or result is not None:
+                return
+            inorder(node.left)
+            count += 1
+            if count == k:
+                result = node.val
+                return
+            inorder(node.right)
+
+        count = 0
+        result = None
+        inorder(root)
+        return result
+
+    root = build_bst(values)
+    return kth_smallest(root, k)
+
+print(kth_smallest_from_list([3, 1, 4, 2], 2) == 2)  # 🎯 Segundo más pequeño
+print(kth_smallest_from_list([5, 3, 7, 2, 4, 6, 8], 1) == 2)  # 📉 Mínimo
+print(kth_smallest_from_list([5, 3, 7, 2, 4, 6, 8], 7) == 8)  # 📈 Máximo
+print(kth_smallest_from_list([4, 2, 6, 1, 3, 5, 7], 4) == 4)  # 🪞 Elemento medio
+print(kth_smallest_from_list([10], 1) == 10)  # 🌱 Árbol de un solo nodo
+
+
+
+
+
+
+
+Ejercicio 5:
+
+-The code constructs binary search trees (BSTs) from lists of values ​​and converts them to ordered circular doubly linked lists (DLLs), using in-order traversal to correctly link nodes. It also 
+includes functions for constructing normal and degenerate (list-like) BSTs, and a function that validates that the resulting DLL contains the expected values ​​in both directions and that the structure
+is circular. This allows a BST to be transformed into a circular DLL while maintaining the order of the elements and verifying the correctness of this transformation through tests.
+
+
+
+class Node:
+    def __init__(self, val):
+        self.val = val
+        self.left = None  
+        self.right = None 
+
+def build_bst(values):
+    """Construye un BST a partir de una lista de valores insertándolos uno a uno."""
+    if not values:
+        return None
+
+    root = None
+    for val in values:
+        root = insert_bst(root, val)
+    return root
+
+def insert_bst(root, val):
+    if root is None:
+        return Node(val)
+    if val < root.val:
+        root.left = insert_bst(root.left, val)
+    else:
+        root.right = insert_bst(root.right, val)
+    return root
+
+def build_degenerate_bst(values):
+    """Construye un BST degenerado tipo lista enlazada (todo a la derecha)."""
+    if not values:
+        return None
+    root = Node(values[0])
+    current = root
+    for val in values[1:]:
+        current.right = Node(val)
+        current = current.right
+    return root
+
+def validate_circular_dll(head, expected_vals):
+    """Valida que la DLL circular tiene los valores esperados en orden."""
+    if not head:
+        return len(expected_vals) == 0
+    
+    n = len(expected_vals)
+    current = head
+    for i in range(n):
+        if current.val != expected_vals[i]:
+            return False
+        current = current.right
+    if current != head:
+        return False
+
+    current = head.left
+    for i in range(n - 1, -1, -1):
+        if current.val != expected_vals[i]:
+            return False
+        current = current.left
+    if current != head.left:
+        return False
+    
+    return True
+
+def bst_to_dll(root):
+    if not root:
+        return None
+
+    prev = None
+    head = None
+
+    def inorder(node):
+        nonlocal prev, head
+        if not node:
+            return
+
+        inorder(node.left)
+
+        if prev is None:
+            head = node
+        else:
+            prev.right = node
+            node.left = prev
+        prev = node
+
+        inorder(node.right)
+
+    inorder(root)
+
+    head.left = prev
+    prev.right = head
+
+    return head
+
+
+head1 = bst_to_dll(build_bst([2, 1, 3]))
+print(validate_circular_dll(head1, [1, 2, 3]) == True) 
+
+head2 = bst_to_dll(build_bst([4, 2, 6, 1, 3, 5, 7]))
+print(validate_circular_dll(head2, [1, 2, 3, 4, 5, 6, 7]) == True) 
+
+head3 = bst_to_dll(build_bst([5]))
+print(validate_circular_dll(head3, [5]) == True) 
+
+head4 = bst_to_dll(build_degenerate_bst([1, 2, 3, 4]))
+print(validate_circular_dll(head4, [1, 2, 3, 4]) == True)
+
+head5 = bst_to_dll(None)
+print(head5 is None)
