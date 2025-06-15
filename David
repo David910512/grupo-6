@@ -1,1 +1,251 @@
+Ejer 1:
 
+class MinHeap:
+    def __init__(self):
+        self.heap = []
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+def test_min_heap_init_and_empty():
+    h = MinHeap()
+    print("🌱 Test 1:", h.is_empty() == True)
+    h.heap.append(1)
+    print("🌱 Test 2:", h.is_empty() == False)
+    h.heap.clear()
+    print("🌱 Test 3:", h.is_empty() == True)
+    h.heap.extend([2, 3, 4])
+    print("🌱 Test 4:", h.is_empty() == False)
+    h.heap.pop()
+    h.heap.pop()
+    h.heap.pop()
+    print("🌱 Test 5:", h.is_empty() == True)
+
+test_min_heap_init_and_empty()
+
+
+
+Ejer 2 :
+
+
+class MinHeap:
+    def __init__(self):
+        self.heap = []
+
+    def is_empty(self):
+        return len(self.heap) == 0
+
+    def insert(self, value):
+        self.heap.append(value)
+        self._heapify_up(len(self.heap) - 1)
+
+    def _heapify_up(self, index):
+        while index > 0:
+            parent_index = (index - 1) // 2
+            if self.heap[parent_index] > self.heap[index]:
+                self.heap[parent_index], self.heap[index] = self.heap[index], self.heap[parent_index]
+                index = parent_index
+            else:
+                break
+
+def test_min_heap_insert():
+    h = MinHeap()
+    h.insert(5)
+    print("🍀 Test 1:", h.heap == [5])
+    h.insert(3)
+    print("🍀 Test 2:", h.heap == [3, 5])
+    h.insert(4)
+    print("🍀 Test 3:", h.heap == [3, 5, 4])
+    h.insert(1)
+    print("🍀 Test 4:", h.heap == [1, 3, 4, 5])
+    valid = True
+    for i in range(len(h.heap)):
+        left = 2 * i + 1
+        right = 2 * i + 2
+        if left < len(h.heap) and h.heap[i] > h.heap[left]:
+            valid = False
+        if right < len(h.heap) and h.heap[i] > h.heap[right]:
+            valid = False
+    print("🍀 Test 5:", valid)
+
+test_min_heap_insert()
+
+Ejer 3:
+
+
+
+class MinHeap:
+    def __init__(self):
+        self.heap = []
+
+    def insert(self, value):
+        self.heap.append(value)
+        self._heapify_up(len(self.heap) - 1)
+
+    def _heapify_up(self, index):
+        parent = (index - 1) // 2
+        while index > 0 and self.heap[index] < self.heap[parent]:
+            self.heap[index], self.heap[parent] = self.heap[parent], self.heap[index]
+            index = parent
+            parent = (index - 1) // 2
+
+    def delete_min(self):
+        if not self.heap:
+            return None
+        if len(self.heap) == 1:
+            return self.heap.pop()
+        
+        min_val = self.heap[0]
+        self.heap[0] = self.heap.pop()  
+        self._heapify_down(0)
+        return min_val
+
+    def _heapify_down(self, index):
+        size = len(self.heap)
+        while index < size:
+            left = 2 * index + 1
+            right = 2 * index + 2
+            smallest = index
+
+            if left < size and self.heap[left] < self.heap[smallest]:
+                smallest = left
+            if right < size and self.heap[right] < self.heap[smallest]:
+                smallest = right
+
+            if smallest != index:
+                self.heap[index], self.heap[smallest] = self.heap[smallest], self.heap[index]
+                index = smallest
+            else:
+                break
+
+def test_min_heap_delete_min():
+    h = MinHeap()
+    print("🧹 Test 1:", h.delete_min() is None)
+    h.heap = [1]
+    print("🧹 Test 2:", h.delete_min() == 1 and h.heap == [])
+    h.heap = [1, 3, 2]
+    print("🧹 Test 3:", h.delete_min() == 1 and h.heap == [2, 3])
+    h.heap = [1, 3, 4, 5]
+    print("🧹 Test 4:", h.delete_min() == 1 and h.heap == [3, 5, 4])
+    h.heap = [1, 2, 3, 4, 5]
+    min_val = min(h.heap)
+    print("🧹 Test 5:", h.delete_min() == min_val)
+
+test_min_heap_delete_min()
+
+
+
+
+Ejer 4:
+
+
+
+
+class MinHeap:
+    def __init__(self):
+        self.heap = []
+
+    def build_heap(self, array):
+        self.heap = array[:]  
+        start_index = (len(self.heap) - 2) // 2
+        for i in range(start_index, -1, -1):
+            self._heapify_down(i)
+
+    def _heapify_down(self, index):
+        smallest = index
+        left = 2 * index + 1
+        right = 2 * index + 2
+        size = len(self.heap)
+
+        if left < size and self.heap[left] < self.heap[smallest]:
+            smallest = left
+        if right < size and self.heap[right] < self.heap[smallest]:
+            smallest = right
+        if smallest != index:
+            self.heap[index], self.heap[smallest] = self.heap[smallest], self.heap[index]
+            self._heapify_down(smallest)
+
+def test_build_heap():
+    h = MinHeap()
+    h.build_heap([5, 3, 8, 1, 2])
+    print("🔨 Test 1:", h.heap[0] == min([5, 3, 8, 1, 2]))
+    h.build_heap([7, 6, 5, 4, 3, 2, 1])
+    print("🔨 Test 2:", h.heap[0] == 1)
+    h.build_heap([2, 1])
+    print("🔨 Test 3:", h.heap == [1, 2])
+    h.build_heap([10])
+    print("🔨 Test 4:", h.heap == [10])
+    h.build_heap([])
+    print("🔨 Test 5:", h.heap == [])
+
+test_build_heap()
+
+
+
+
+
+
+
+
+
+
+
+
+Ejer 5:
+
+
+class MaxHeap:
+    def __init__(self):
+        self.heap = []
+
+    def insert(self, value):
+        self.heap.append(value)
+        self._heapify_up(len(self.heap) - 1)
+
+    def _heapify_up(self, index):
+        parent = (index - 1) // 2
+        if index > 0 and self.heap[parent] < self.heap[index]:
+            self.heap[parent], self.heap[index] = self.heap[index], self.heap[parent]
+            self._heapify_up(parent)
+
+    def delete_max(self):
+        if not self.heap:
+            return None
+        if len(self.heap) == 1:
+            return self.heap.pop()
+        max_value = self.heap[0]
+        self.heap[0] = self.heap.pop()
+        self._heapify_down(0)
+        return max_value
+
+    def _heapify_down(self, index):
+        largest = index
+        left = 2 * index + 1
+        right = 2 * index + 2
+        if left < len(self.heap) and self.heap[left] > self.heap[largest]:
+            largest = left
+        if right < len(self.heap) and self.heap[right] > self.heap[largest]:
+            largest = right
+        if largest != index:
+            self.heap[index], self.heap[largest] = self.heap[largest], self.heap[index]
+            self._heapify_down(largest)
+
+def test_max_heap():
+    h = MaxHeap()
+    h.insert(1)
+    print("🦁 Test 1:", h.heap == [1])
+    for val in [3, 2, 8, 5]:
+        h.insert(val)
+    print("🦁 Test 2:", h.heap[0] == max(h.heap))
+    h.delete_max()
+    print("🦁 Test 3:", h.heap[0] == max(h.heap))
+    h = MaxHeap()
+    for val in [5, 3, 1]:
+        h.insert(val)
+    h.delete_max()
+    print("🦁 Test 4:", h.heap == [3, 1])
+    h = MaxHeap()
+    h.insert(10)
+    print("🦁 Test 5:", h.delete_max() == 10 and h.heap == [])
+
+test_max_heap()
